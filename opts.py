@@ -6,7 +6,7 @@ def parse():
     parser = argparse.ArgumentParser(description='BC learning for sounds')
 
     # General settings
-    parser.add_argument('--dataset', required=True, choices=['esc10', 'esc50', 'urbansound8k'])
+    parser.add_argument('--dataset', required=True, choices=['esc10', 'esc50', 'urbansound8k', 'emovo', 'emodb', 'urdu', 'shemo', 'savee'])
     parser.add_argument('--mixup_type', required=True, choices=['sound', 'normal'])
     
     parser.add_argument('--netType', required=True, choices=['envnet', 'envnetv2'])
@@ -39,6 +39,18 @@ def parse():
     elif opt.dataset == 'esc10':
         opt.nClasses = 10
         opt.nFolds = 5
+    elif opt.dataset == 'urdu':
+        opt.nClasses = 4
+        opt.nFolds = 1
+    elif opt.dataset == 'emovo' or opt.dataset == 'savee':
+        opt.nClasses = 7
+        opt.nFolds = 1
+    elif opt.dataset == 'emodb':
+        opt.nClasses = 8
+        opt.nFolds = 1 
+    elif opt.dataset == 'shemo':
+        opt.nClasses = 5
+        opt.nFolds = 1
     else:  # urbansound8k
         opt.nClasses = 10
         opt.nFolds = 10
@@ -69,6 +81,26 @@ def parse():
     default_settings['urbansound8k'] = {
         'envnet': {'nEpochs': 400, 'LR': 0.01, 'schedule': [0.5, 0.75], 'warmup': 0},
         'envnetv2': {'nEpochs': 600, 'LR': 0.1, 'schedule': [0.3, 0.6, 0.9], 'warmup': 10}
+    }
+    default_settings["urdu"] = {
+        "envnet": {"nEpochs": 600, "LR": 0.01, "schedule": [0.5, 0.75], "warmup": 0},
+        "envnetv2": {"nEpochs": 600, "LR": 0.01, "schedule": [0.5, 0.75], "warmup": 0},
+    }
+    default_settings["savee"] = {
+        "envnet": {"nEpochs": 600, "LR": 0.01, "schedule": [0.5, 0.75], "warmup": 0},
+        "envnetv2": {"nEpochs": 600, "LR": 0.01, "schedule": [0.5, 0.75], "warmup": 0},
+    }
+    default_settings["emodb"] = {
+        "envnet": {"nEpochs": 600, "LR": 0.01, "schedule": [0.5, 0.75], "warmup": 0},
+        "envnetv2": {"nEpochs": 600, "LR": 0.01, "schedule": [0.5, 0.75], "warmup": 0},
+    }
+    default_settings["emovo"] = {
+        "envnet": {"nEpochs": 600, "LR": 0.01, "schedule": [0.5, 0.75], "warmup": 0},
+        "envnetv2": {"nEpochs": 600, "LR": 0.01, "schedule": [0.5, 0.75], "warmup": 0},
+    }
+    default_settings["shemo"] = {
+        "envnet": {"nEpochs": 600, "LR": 0.01, "schedule": [0.5, 0.75], "warmup": 0},
+        "envnetv2": {"nEpochs": 600, "LR": 0.01, "schedule": [0.5, 0.75], "warmup": 0},
     }
     for key in ['nEpochs', 'LR', 'schedule', 'warmup']:
         if eval('opt.{}'.format(key)) == -1:

@@ -24,7 +24,20 @@ def main():
 
 
 def train(opt, split):
+    start_epoch = 0
     model = getattr(models, opt.netType)(opt.nClasses)
+
+    model_root_dir = Path(opt.save)
+    if "model_split_{}.npz".format(split) in [f for f in os.listdir(model_root_dir)]:
+        print("Pre-trained available for model_split_{}.npz".format(split))
+        chainer.serializers.load_npz(
+            model_root_dir / "model_split_{}.npz".format(split), model
+        )
+        with open(model_root_dir / "epoch_{}.json".format(split), "r") as fp:
+            start_epoch = json.load(fp)["epoch"]
+
+    print("Starting training at epoch: {}".format(start_epoch + 1))
+
     model.to_gpu()
     optimizer = chainer.optimizers.NesterovAG(lr=opt.LR, momentum=opt.momentum)
     optimizer.setup(model)
@@ -38,7 +51,7 @@ def train(opt, split):
         val_top1 = trainer.val()
         print('| Val: top1 {:.2f}'.format(val_top1))
     best = 100
-    for epoch in range(1, opt.nEpochs + 1):
+    for epoch in range(start_epoch + 1, opt.nEpochs + 1):
         train_loss, train_top1 = trainer.train(epoch)
         val_top1 = trainer.val()
         if(val_top1<best):
@@ -47,10 +60,15 @@ def train(opt, split):
         sys.stdout.write(
             '| Epoch: {}/{} | Train: LR {}  Loss {:.3f}  top1 {:.2f} | Val: top1 {:.2f} | best {:.2f}\n'.format(
                 epoch, opt.nEpochs, trainer.optimizer.lr, train_loss, train_top1, val_top1,best))
-        sys.stdout.flush()
-        if epoch%10==0:
+        
+        if epoch % 10 == 0:
             chainer.serializers.save_npz(
-            os.path.join(opt.save, 'model_split{}.npz'.format(split)), model)
+                model_root_dir / "model_split_{}.npz".format(split), model
+            )
+            with open(model_root_dir / "epoch_{}.json".format(split), "w") as fp:
+                json.dump({"epoch": epoch}, fp)
+            print(f'Checkpoint saved to {model_root_dir / f"model_split_{split}.npz"}')
+        sys.stdout.flush()
 
 
 if __name__ == '__main__':

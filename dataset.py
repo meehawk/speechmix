@@ -2,6 +2,7 @@ import os
 import numpy as np
 import random
 import chainer
+from sklearn.model_selection import train_test_split
 
 import utils as U
 
@@ -158,15 +159,30 @@ def setup(opt, split):
     train_labels = []
     val_sounds = []
     val_labels = []
-    for i in range(1, opt.nFolds + 1):
-        sounds = dataset['fold{}'.format(i)].item()['sounds']
-        labels = dataset['fold{}'.format(i)].item()['labels']
-        if i == split:
-            val_sounds.extend(sounds)
-            val_labels.extend(labels)
-        else:
-            train_sounds.extend(sounds)
-            train_labels.extend(labels)
+
+    if opt.dataset in ['urdu', 'savee', 'emodb', 'emovo', 'shemo']:
+        train_sounds, val_sounds, train_labels, val_labels = train_test_split(
+            dataset['sounds'],
+            dataset['labels'],
+            test_size=0.2,
+            shuffle=True,
+            stratify=dataset['labels'],
+            random_state=opt.seedVal,
+        )
+
+        if len(train_sounds) % 2 != 0:
+            train_sounds = train_sounds[:-1]
+            train_labels = train_labels[:-1]
+    else:
+        for i in range(1, opt.nFolds + 1):
+            sounds = dataset[f'fold{i}'].item()['sounds']
+            labels = dataset[f'fold{i}'].item()['labels']
+            if i == split:
+                val_sounds.extend(sounds)
+                val_labels.extend(labels)
+            else:
+                train_sounds.extend(sounds)
+                train_labels.extend(labels)
 
     # Iterator setup
     train_data = SoundDataset_Train(train_sounds, train_labels, opt, train=True)
