@@ -24,8 +24,6 @@ class Trainer:
         train_acc = 0
         for i, batch in enumerate(self.train_iter):
             x_array, t_array = chainer.dataset.concat_examples(batch)
-            x_array = np.reshape(x_array,(self.opt.batchSize*2,-1)).astype('float32')
-            t_array = np.reshape(t_array,(self.opt.batchSize*2,-1)).astype('float32')
             x = chainer.Variable(cuda.to_gpu(x_array[:, None, None, :]))
             t = chainer.Variable(cuda.to_gpu(t_array))
             self.model.cleargrads()
