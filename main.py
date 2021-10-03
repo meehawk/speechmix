@@ -3,7 +3,7 @@
  Yuji Tokozume, Yoshitaka Ushiku, and Tatsuya Harada
 
 """
-
+import json
 import sys
 import os
 import chainer
